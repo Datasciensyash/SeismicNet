@@ -1,7 +1,7 @@
 from modules.metrics import iou_pytorch
-from modules.losses import ce_Loss, jaccard_loss, dice_loss
+from modules.losses import ce_loss, jaccard_loss, dice_loss
 
-from modules.config import Configurator
+from modules.config import Config
 from modules.logger import LogHolder
 
 from modules.dataset import SeismicDataset
@@ -83,7 +83,7 @@ class TrainRunner():
 		Returns: lambda function defined as: weighted_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
-		criterion = lambda y, y_pred: ce_loss(y, y_pred, weights.to(device)) + jaccard_loss(y, y_pred)
+		criterion = lambda y, y_pred: 0.85 * ce_loss(y, y_pred, weights.to(device)) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		return criterion
 
 	def init_augmentation(self, CONFIGURATION):
@@ -236,12 +236,10 @@ class TrainRunner():
 
 	def inference(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='Valid'):
 		"""
-		Validating loop for model.
+		Inference for the model.
 			model -> Torch model to validate / test
-			criterion -> loss function
 			torch.DataLoader: dataloader -> Data loader instance
 			torch.device: device -> Device (GPU / CPU)
-			Int: NUM_EPOCHS -> Number of epoch to validate
 
 		Returns: None
 		"""

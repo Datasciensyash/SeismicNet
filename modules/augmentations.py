@@ -1,3 +1,6 @@
+
+import albumentations
+
 def vertical_shift(img, shift_width, shift_height, shift_p):
     shift_size = random.randint(shift_width[0], shift_width[1])
 
