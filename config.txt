@@ -1,8 +1,6 @@
 {
-
-	#Data loading settings
-	'BATCH_SIZE_TRAIN': 32,
-	'SHUFFLE_TRAIN': True,
+	#Training settings
+	'BATCH_SIZE': 32,
 
 	#Data storing settings
 	'TRAIN_PATH': 'Data/Train/',
@@ -11,7 +9,7 @@
 	'LOAD_MODEL': False,
 	'MODEL_LOAD_PATH': 'pretrained/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints',
-	'MODEL_NAME': 'NONE',
+	'MODEL_NAME': 'MY_MODEL',
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 2,
 
@@ -29,14 +27,14 @@
 	'DEVICE': 'cuda:0',
 
 	#Augmentation settings
-	'CROP_SIZE_HEIGHT': 128,
-	'CROP_SIZE_WIDTH': 255,
+	'CROP_SIZE_HEIGHT': 32,
+	'CROP_SIZE_WIDTH': 32,
 	'VERTICAL_FLIP_PROBA': 0.1,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
 	'GAUSS_NOISE_PROBA': 0.0,
 	'GAUSS_NOISE_MAX': 0.005,
 	'NUM_HOLES': 20,
-	'HOLES_SIZE': 2,
+	'HOLE_SIZE': 2,
 	'CUTOUT_PROBA': 0.1,
 	'HS_PROBA': 0.9,
 	'HS_WIDTH_MIN': 4,

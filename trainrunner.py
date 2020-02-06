@@ -20,7 +20,6 @@ class TrainRunner():
 	def __init__(self, config_file='config.txt'):
 
 		CONFIGURATION = Config(config_file)
-		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.LOGNAME)
 
 		#Initialization of model
 		self.model = self.init_model(CONFIGURATION.CHANNELS_IN, CONFIGURATION.CHANNELS_OUT, CONFIGURATION.LOAD_MODEL, CONFIGURATION.MODEL_LOAD_PATH, CONFIGURATION.MODEL_NAME)
@@ -41,7 +40,7 @@ class TrainRunner():
 		self.aug = self.init_augmentation(CONFIGURATION)
 
 		self.CONFIGURATION = CONFIGURATION
-		self.LOGGER = LOGGER
+
 	
 
 	def init_model(self, CHANNELS_IN, CHANNELS_OUT, LOAD_MODEL, MODEL_LOAD_PATH, MODEL_NAME):
@@ -58,9 +57,8 @@ class TrainRunner():
 
 		model = UNet(CHANNELS_IN, CHANNELS_OUT)
 		if LOAD_MODEL:
-			model_state_dict = torch.load(MODEL_LOAD_PATH + MODEL_NAME)
+			model_state_dict = torch.load(MODEL_LOAD_PATH + MODEL_NAME + '.torch')
 			model.load_state_dict(model_state_dict)
-
 		return model
 
 	def init_optimizer(self, ADAM_LR, parameters):
@@ -176,12 +174,13 @@ class TrainRunner():
 
 	def train(self):
 		CONFIGURATION = self.CONFIGURATION
+		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.LOGNAME)
 		seismic, borders = self.get_data(CONFIGURATION.TRAIN_PATH)
-		self.dataloader = self.get_dataloader(seismic, borders, self.aug, CONFIGURATION.BATCH_SIZE_TRAIN, CONFIGURATION.SHUFFLE_TRAIN)
-		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH)
+		self.dataloader = self.get_dataloader(seismic, borders, self.aug, CONFIGURATION.BATCH_SIZE, True)
+		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH, CONFIGURATION.MODEL_NAME)
 		LOGGER.write_to_file()
 
-	def train_loop(self, model, optimizer, criterion, metric, dataloader, device, logger, NUM_EPOCHS, CHECKPOINT_EP, CHECKPOINT_DIR):
+	def train_loop(self, model, optimizer, criterion, metric, dataloader, device, logger, NUM_EPOCHS, CHECKPOINT_EP, CHECKPOINT_DIR, MODELNAME):
 		"""
 		Training loop for model.
 			model -> Torch model to train
@@ -226,7 +225,8 @@ class TrainRunner():
 				logger.write_loss(float(loss.detach().cpu()))
 
 			if (epoch + 1) % CHECKPOINT_EP == 0:
-				torch.save(model.state_dict(), CHECKPOINT_DIR + f'{epoch}ep.torch')
+				torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}-{epoch}ep.torch')
+			torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}.torch')		
 		return None
 
 	def inference(self, path, name):

@@ -33,7 +33,7 @@ class SeismicDataset(Dataset):
     def __len__(self):
 
 
-        if dtype == 'Train' and random.random() < self.reverse_chance:
+        if self.dtype == 'Train' and random.random() < self.reverse_chance:
             self.swap_axes()
             
         return len(self.train_Y)
