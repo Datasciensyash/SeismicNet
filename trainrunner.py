@@ -16,6 +16,7 @@ import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
+
 class TrainRunner():
 	def __init__(self, config_file='config.txt'):
 
@@ -174,7 +175,7 @@ class TrainRunner():
 
 	def train(self):
 		CONFIGURATION = self.CONFIGURATION
-		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.LOGNAME)
+		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.MODEL_NAME)
 		seismic, borders = self.get_data(CONFIGURATION.TRAIN_PATH)
 		self.dataloader = self.get_dataloader(seismic, borders, self.aug, CONFIGURATION.BATCH_SIZE, True)
 		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH, CONFIGURATION.MODEL_NAME)
@@ -229,12 +230,14 @@ class TrainRunner():
 			torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}.torch')		
 		return None
 
-	def inference(self, path, name):
+	def inference(self, path):
+		CONFIGURATION = self.CONFIGURATION
+		name = CONFIGURATION.MODEL_NAME
 		seismic, borders = self.get_data(path)
-		self.dataloader = self.get_dataloader(seismic, borders, False, 1, False, dtype='Valid')
-		self.inference(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
+		self.dataloader = self.get_dataloader(seismic, borders, False, 1, False, dtype='Test')
+		self.inference_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
 
-	def inference(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='Valid'):
+	def inference_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='Valid'):
 		"""
 		Inference for the model.
 			model -> Torch model to validate / test

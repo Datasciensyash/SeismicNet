@@ -8,7 +8,7 @@
 	#Model settings
 	'LOAD_MODEL': False,
 	'MODEL_LOAD_PATH': 'pretrained/',
-	'MODEL_SAVE_PATH': 'pretrained/checkpoints',
+	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
 	'MODEL_NAME': 'MY_MODEL',
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 2,
@@ -44,8 +44,8 @@
 	'HS_SHIFT_PROBA': 0.1,
 
 	#Logging settings
-	'LOGDIR': 'output/logs',
-	'LOGNAME': 's',
+	'LOGDIR': 'output/logs/',
+	'LOGNAME': '',
 
 	#CHECKPOINT SETTINGS
 	'CHECKPOINT_EVERY_N_EPOCHS': 50,

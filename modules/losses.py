@@ -1,5 +1,5 @@
 import torch
-import torch.functional as F
+from torch.nn import functional as F
 
 def ce_loss(true, logits, weights, ignore=255):
     """Computes the weighted multi-class cross-entropy loss.
