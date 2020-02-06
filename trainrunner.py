@@ -262,6 +262,6 @@ class TrainRunner():
 				output = np.concatenate([output, Y_pred.argmax(1).cpu().numpy().astype(np.uint8)], axis=0)
 
 		if SAVE:
-			np.save(f'output/predicted/{SAVE_PREFIX}.npy', output)
+			np.save(f'output/predictions/{SAVE_PREFIX}.npy', output)
 
 		return None
