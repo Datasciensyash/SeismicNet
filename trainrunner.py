@@ -56,7 +56,7 @@ class TrainRunner():
 		Returns: Model
 		"""
 
-		model = UNet(CHANNELS_IN, CHANNELS_OUT)
+		model = UNet(CHANNELS_IN, CHANNELS_OUT, False)
 		if LOAD_MODEL:
 			model_state_dict = torch.load(MODEL_LOAD_PATH + MODEL_NAME + '.torch')
 			model.load_state_dict(model_state_dict)
@@ -79,7 +79,7 @@ class TrainRunner():
 			Float: CLASS_WEIGHT_0 -> Weight for class 0
 			Float: CLASS_WEIGHT_1 -> Weight for class 1
 
-		Returns: lambda function defined as: weighted_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred)
+		Returns: lambda function defined as: 0.85 * weighted_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
 		criterion = lambda y, y_pred: 0.85 * ce_loss(y, y_pred, weights.to(device)) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
@@ -103,12 +103,12 @@ class TrainRunner():
 			albumentations.VerticalFlip(p=CONFIGURATION.VERTICAL_FLIP_PROBA),
 			albumentations.GaussNoise(var_limit=CONFIGURATION.GAUSS_NOISE_MAX, p=CONFIGURATION.GAUSS_NOISE_PROBA),
 			albumentations.Cutout(num_holes=CONFIGURATION.NUM_HOLES, max_h_size=CONFIGURATION.HOLE_SIZE, max_w_size=CONFIGURATION.HOLE_SIZE, p=CONFIGURATION.CUTOUT_PROBA),
-			albumentations.Blur(blur_limit=6, p=0.6),
+			albumentations.Blur(blur_limit=3, p=0.2),
 			albumentations.OneOf([
 				albumentations.RandomBrightness(p=0.5),
 				albumentations.RandomBrightnessContrast(p=0.5),				
 				], p=0.4),
-			HorizontalShift(shift_width=(3, 6), shift_height=(2, 4), shift_p=0.1,  always_apply=False, p=0.1),
+			HorizontalShift(shift_width=(3, 6), shift_height=(2, 4), shift_p=0.1, p=0.1),
 			InvertImg(p=0.5)	
 			])
 
@@ -118,6 +118,8 @@ class TrainRunner():
 		"""
 		Reading data from files.
 			Str: path -> Path to folder with arrays
+			Str: bordername -> Name of file contains mask
+			Str: seismicname -> Name of file contains seismic data
 
 		Returns: seismic, borders data
 		"""	
@@ -141,7 +143,8 @@ class TrainRunner():
 			np.array: borders -> Numpy array with masks
 			albumentations.Compose: aug -> Augmentations
 			Int: batch_size -> Batch size for dataloader
-			Bool: shuffle -> Shuffle data
+			Bool: shuffle -> Shuffle data or not
+			Str: dtype -> Type of dataset instance
 
 		Returns: torch.Dataloader
 		"""
@@ -174,6 +177,11 @@ class TrainRunner():
 		return lambda y, y_pred: iou_pytorch(y_pred.cpu(), y.cpu())
 
 	def train(self):
+		"""
+		Function to auto-train model.
+		All configs in config file.
+		"""
+
 		CONFIGURATION = self.CONFIGURATION
 		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.MODEL_NAME)
 		seismic, borders = self.get_data(CONFIGURATION.TRAIN_PATH)
@@ -190,6 +198,9 @@ class TrainRunner():
 			torch.DataLoader: dataloader -> Data loader instance
 			torch.device: device -> Device (GPU / CPU)
 			Int: NUM_EPOCHS -> Number of epoch to train
+			Int: CHECKPOINT_EP -> Number of epoch, that define when model will be checkpointed
+			Str: CHECKPOINT_DIR -> Directory to save checkpointed weights
+			Str: MODELNAME -> Filename of saving model
 
 		Returns: None
 		"""
@@ -230,21 +241,29 @@ class TrainRunner():
 			torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}.torch')		
 		return None
 
-	def inference(self, path):
+	def predict(self, path, data_name='seismic.npy'):
+		"""
+		Function to predict data, stored in path.
+			Str: path -> Path to data. Must contain data_name file.
+			Str: data_name -> Name of file with 3D seismic data.
+		"""
 		CONFIGURATION = self.CONFIGURATION
 		name = CONFIGURATION.MODEL_NAME
-		seismic, borders = self.get_data(path)
+		seismic, borders = self.get_data(path, seismicname=data_name)
 		self.dataloader = self.get_dataloader(seismic, borders, False, 1, False, dtype='Test')
 		self.inference_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
 
-	def inference_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='Valid'):
+	def predict_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='None', SAVEPATH='output/predictions/'):
 		"""
 		Inference for the model.
-			model -> Torch model to validate / test
+			model -> Torch model to make predictions
 			torch.DataLoader: dataloader -> Data loader instance
 			torch.device: device -> Device (GPU / CPU)
+			Bool: SAVE -> Save predictions or not
+			Str: SAVE_PREFIX -> Filename to save
+			Str: SAVEPATH -> Path to save predictions if needed
 
-		Returns: None
+		Returns: predicted mask (3D numpy.array)
 		"""
 		model.to(device)
 		for i, (X, Y) in enumerate(iter(dataloader)):
@@ -262,6 +281,6 @@ class TrainRunner():
 				output = np.concatenate([output, Y_pred.argmax(1).cpu().numpy().astype(np.uint8)], axis=0)
 
 		if SAVE:
-			np.save(f'output/predictions/{SAVE_PREFIX}.npy', output)
+			np.save(f'{SAVEPATH}{SAVE_PREFIX}.npy', output)
 
-		return None
+		return output

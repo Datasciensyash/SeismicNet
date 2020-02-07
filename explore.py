@@ -9,7 +9,7 @@ from modules.metrics import iou_numpy
 def iou_score(mask, predicted):
 	return iou_numpy(mask, predicted, mean=False)
 
-@st.cache
+
 def visualize_metrics(metrics):
 	st.line_chart(pd.DataFrame(metrics, columns=['IoU']))
 
@@ -25,8 +25,8 @@ OUT_DATA_MASK = st.selectbox('Select filename', os.listdir(OUT_DATA_MASK_DIR))
 
 #Loading arrays
 seismic = min_max_norm(np.load(ORIGINAL_DATA_SEISMIC))
-mask = np.load(ORIGINAL_DATA_MASK)
-predicted = np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK)
+mask = np.load(ORIGINAL_DATA_MASK).astype('uint8')
+predicted = np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK).astype('uint8')
 #
 
 metrics = iou_score(mask, predicted)

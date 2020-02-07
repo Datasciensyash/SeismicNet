@@ -10,4 +10,4 @@ if __name__ == '__main__':
 	config = args.config
 	data_path = args.path
 
-	TrainRunner(config).inference(data_path)
+	TrainRunner(config).predict(data_path)

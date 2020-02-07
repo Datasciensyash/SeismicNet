@@ -6,10 +6,10 @@
 	'TRAIN_PATH': 'Data/Train/',
 
 	#Model settings
-	'LOAD_MODEL': False,
+	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'MY_MODEL',
+	'MODEL_NAME': 'MY_MODEL_UPCONV_BIG',
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 2,
 
@@ -21,15 +21,15 @@
 	'CLASS_WEIGHT_1': 0.5,
 
 	#Training process settings
-	'NUM_EPOCHS': 150,
+	'NUM_EPOCHS': 200,
 
 	#Device settings
 	'DEVICE': 'cuda:0',
 
 	#Augmentation settings
-	'CROP_SIZE_HEIGHT': 32,
-	'CROP_SIZE_WIDTH': 32,
-	'VERTICAL_FLIP_PROBA': 0.1,
+	'CROP_SIZE_HEIGHT': 48,
+	'CROP_SIZE_WIDTH': 48,
+	'VERTICAL_FLIP_PROBA': 0.3,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
 	'GAUSS_NOISE_PROBA': 0.0,
 	'GAUSS_NOISE_MAX': 0.005,
