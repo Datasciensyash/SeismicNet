@@ -1,5 +1,5 @@
-# SeisNet
-Seismic facies borders segmentation neural network.
+# SeismicSEPNet
+Seismic facies separation neural network.
 
 **Easy start**
 ```
