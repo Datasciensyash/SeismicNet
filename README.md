@@ -1,4 +1,4 @@
-# SeisDivNet
+# DivNet
 Neural network for dividing seismic facies.
 
 **Easy start**
