@@ -1,5 +1,5 @@
-# SeismicSEPNet
-Seismic facies separation neural network.
+# SeisDivNet
+Neural network for dividing seismic facies.
 
 **Easy start**
 ```
