@@ -1,5 +1,5 @@
-# SeisNet
-Seismic facies borders segmentation neural network.
+# DivNet
+Neural network for dividing seismic facies.
 
 **Easy start**
 ```
