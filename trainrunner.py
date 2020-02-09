@@ -82,7 +82,7 @@ class TrainRunner():
 		Returns: lambda function defined as: 0.85 * weighted_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
-		criterion = lambda y, y_pred: 0.85 * ce_loss(y, y_pred, weights.to(device)) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
+		criterion = lambda y, y_pred: jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		return criterion
 
 	def init_augmentation(self, CONFIGURATION):
@@ -103,13 +103,13 @@ class TrainRunner():
 			albumentations.VerticalFlip(p=CONFIGURATION.VERTICAL_FLIP_PROBA),
 			albumentations.GaussNoise(var_limit=CONFIGURATION.GAUSS_NOISE_MAX, p=CONFIGURATION.GAUSS_NOISE_PROBA),
 			albumentations.Cutout(num_holes=CONFIGURATION.NUM_HOLES, max_h_size=CONFIGURATION.HOLE_SIZE, max_w_size=CONFIGURATION.HOLE_SIZE, p=CONFIGURATION.CUTOUT_PROBA),
-			albumentations.Blur(blur_limit=3, p=0.2),
+			albumentations.Blur(blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA),
 			albumentations.OneOf([
 				albumentations.RandomBrightness(p=0.5),
 				albumentations.RandomBrightnessContrast(p=0.5),				
-				], p=0.4),
+				], p=0.5),
 			HorizontalShift(shift_width=(3, 6), shift_height=(2, 4), shift_p=0.1, p=0.1),
-			InvertImg(p=0.5)	
+			InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA)	
 			])
 
 		return augmentation
@@ -176,15 +176,15 @@ class TrainRunner():
 
 		return lambda y, y_pred: iou_pytorch(y_pred.cpu(), y.cpu())
 
-	def train(self):
+	def train(self, path):
 		"""
 		Function to auto-train model.
-		All configs in config file.
+			Str: path -> Path to training data
 		"""
 
 		CONFIGURATION = self.CONFIGURATION
 		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.MODEL_NAME)
-		seismic, borders = self.get_data(CONFIGURATION.TRAIN_PATH)
+		seismic, borders = self.get_data(path)
 		self.dataloader = self.get_dataloader(seismic, borders, self.aug, CONFIGURATION.BATCH_SIZE, True)
 		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH, CONFIGURATION.MODEL_NAME)
 		LOGGER.write_to_file()
@@ -224,7 +224,7 @@ class TrainRunner():
 				loss = criterion(Y.long(), Y_pred)
 
 				#Compute metrics
-				metrics = metric(Y.long(), Y_pred.argmax(1))
+				metrics = metric(Y.int(), Y_pred.round().int())
 
 				#Backprop loss
 				loss.backward()
@@ -251,7 +251,7 @@ class TrainRunner():
 		name = CONFIGURATION.MODEL_NAME
 		seismic, borders = self.get_data(path, seismicname=data_name)
 		self.dataloader = self.get_dataloader(seismic, borders, False, 1, False, dtype='Test')
-		self.inference_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
+		self.predict_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
 
 	def predict_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='None', SAVEPATH='output/predictions/'):
 		"""
@@ -276,9 +276,9 @@ class TrainRunner():
 			Y_pred = model(X.unsqueeze(1))
 
 			if i == 0:
-				output = Y_pred.argmax(1).cpu().numpy().astype(np.uint8)
+				output = Y_pred.detach().squeeze(1).cpu().numpy()
 			else:
-				output = np.concatenate([output, Y_pred.argmax(1).cpu().numpy().astype(np.uint8)], axis=0)
+				output = np.concatenate([output, Y_pred.detach().squeeze(1).cpu().numpy()], axis=0)
 
 		if SAVE:
 			np.save(f'{SAVEPATH}{SAVE_PREFIX}.npy', output)

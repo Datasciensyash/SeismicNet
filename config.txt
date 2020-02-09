@@ -2,26 +2,26 @@
 	#Training settings
 	'BATCH_SIZE': 32,
 
-	#Data storing settings
-	'TRAIN_PATH': 'Data/Train/',
-
 	#Model settings
 	'LOAD_MODEL': True,
-	'MODEL_LOAD_PATH': 'pretrained/',
+	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'MY_MODEL_UPCONV_BIG',
+	'MODEL_NAME': 'A_MODEL_UPCONV',
 	'CHANNELS_IN': 1,
-	'CHANNELS_OUT': 2,
+	'CHANNELS_OUT': 1,
 
 	#Optimizer settings
 	'ADAM_LR': 0.0001,
 
 	#Weighted cross-entropy settings
-	'CLASS_WEIGHT_0': 0.5,
-	'CLASS_WEIGHT_1': 0.5,
+	'CLASS_WEIGHT_0': 0.6,
+	'CLASS_WEIGHT_1': 0.4,
 
 	#Training process settings
-	'NUM_EPOCHS': 200,
+	'NUM_EPOCHS': 32,
+
+	#Output settings
+	'THRESHOLD': 0.5,
 
 	#Device settings
 	'DEVICE': 'cuda:0',
@@ -32,7 +32,7 @@
 	'VERTICAL_FLIP_PROBA': 0.3,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
 	'GAUSS_NOISE_PROBA': 0.0,
-	'GAUSS_NOISE_MAX': 0.005,
+	'GAUSS_NOISE_MAX': 0.01,
 	'NUM_HOLES': 20,
 	'HOLE_SIZE': 2,
 	'CUTOUT_PROBA': 0.1,
@@ -42,11 +42,14 @@
 	'HS_HEIGHT_MIN': 1,
 	'HS_HEIGHT_MAX': 5,
 	'HS_SHIFT_PROBA': 0.1,
+	'BLUR_LIMIT': 7,
+	'BLUR_PROBA': 0.4,
+	'INVERT_IMG_PROBA': 0.5,
 
 	#Logging settings
 	'LOGDIR': 'output/logs/',
 	'LOGNAME': '',
 
 	#CHECKPOINT SETTINGS
-	'CHECKPOINT_EVERY_N_EPOCHS': 50,
+	'CHECKPOINT_EVERY_N_EPOCHS': 100,
 }
