@@ -6,19 +6,19 @@
 	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'A_MODEL_UPCONV',
+	'MODEL_NAME': 'DU-Net',
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 1,
 
 	#Optimizer settings
-	'ADAM_LR': 0.0001,
+	'ADAM_LR': 0.000146,
 
 	#Weighted cross-entropy settings
-	'CLASS_WEIGHT_0': 0.6,
-	'CLASS_WEIGHT_1': 0.4,
+	'CLASS_WEIGHT_0': 0.45,
+	'CLASS_WEIGHT_1': 0.55,
 
 	#Training process settings
-	'NUM_EPOCHS': 32,
+	'NUM_EPOCHS': 250,
 
 	#Output settings
 	'THRESHOLD': 0.5,
@@ -31,12 +31,12 @@
 	'CROP_SIZE_WIDTH': 48,
 	'VERTICAL_FLIP_PROBA': 0.3,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
-	'GAUSS_NOISE_PROBA': 0.0,
+	'GAUSS_NOISE_PROBA': 0.01,
 	'GAUSS_NOISE_MAX': 0.01,
-	'NUM_HOLES': 20,
+	'NUM_HOLES': 25,
 	'HOLE_SIZE': 2,
 	'CUTOUT_PROBA': 0.1,
-	'HS_PROBA': 0.9,
+	'HS_PROBA': 0.6,
 	'HS_WIDTH_MIN': 4,
 	'HS_WIDTH_MAX': 5,
 	'HS_HEIGHT_MIN': 1,
@@ -51,5 +51,5 @@
 	'LOGNAME': '',
 
 	#CHECKPOINT SETTINGS
-	'CHECKPOINT_EVERY_N_EPOCHS': 100,
+	'CHECKPOINT_EVERY_N_EPOCHS': 50,
 }

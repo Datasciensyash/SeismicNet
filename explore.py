@@ -28,8 +28,8 @@ def threshold_mask(mask, tr):
 @st.cache
 def load_array(ORIGINAL_DATA_SEISMIC, ORIGINAL_DATA_MASK, OUT_DATA_MASK_DIR, OUT_DATA_MASK):
 	seismic = min_max_norm(np.load(ORIGINAL_DATA_SEISMIC))
-	mask = (1 - np.load(ORIGINAL_DATA_MASK)).astype('uint8')
-	predicted = (1 - np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK))
+	mask = 1 - np.load(ORIGINAL_DATA_MASK).astype('uint8')
+	predicted = 1 - np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK)
 	return seismic, mask, predicted
 
 @st.cache
@@ -109,6 +109,7 @@ if SHOW_TTM_GRAPH:
 if SHOW_IMAGES:
 	metrics = iou_score(mask, predicted, tr)
 	mask = min_max_norm(mask)
-	predicted = min_max_norm(threshold_mask(predicted, tr))
-	st.image([seismic[idx].T, mask[idx].T, predicted[idx].T], caption=['Seismic data', 'Ground truth', f'Predicted with IoU {round(metrics[idx], 3)}'])
+	predicted_ = min_max_norm(threshold_mask(predicted, tr))
+	predicted = min_max_norm(predicted)
+	st.image([seismic[idx].T, mask[idx].T, predicted_[idx].T, predicted[idx].T], caption=['Seismic data', 'Ground truth', f'(Thresolded) Predicted with IoU {round(metrics[idx], 3)}', f'Predicted with IoU {round(metrics[idx], 3)}'])
 

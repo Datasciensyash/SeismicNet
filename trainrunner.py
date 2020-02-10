@@ -1,5 +1,5 @@
 from modules.metrics import iou_pytorch
-from modules.losses import ce_loss, jaccard_loss, dice_loss
+from modules.losses import bce_loss, jaccard_loss, dice_loss
 
 from modules.config import Config
 from modules.logger import LogHolder
@@ -79,10 +79,10 @@ class TrainRunner():
 			Float: CLASS_WEIGHT_0 -> Weight for class 0
 			Float: CLASS_WEIGHT_1 -> Weight for class 1
 
-		Returns: lambda function defined as: 0.85 * weighted_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
+		Returns: lambda function defined as: 0.85 * weighted_binary_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
-		criterion = lambda y, y_pred: jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
+		criterion = lambda y, y_pred: 0.85 * bce_loss(y, y_pred) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		return criterion
 
 	def init_augmentation(self, CONFIGURATION):
@@ -219,12 +219,11 @@ class TrainRunner():
 				#Make predictions
 				Y_pred = model(X.unsqueeze(1))
 
-
 				#Compute loss
-				loss = criterion(Y.long(), Y_pred)
+				loss = criterion(Y.unsqueeze(1).long(), Y_pred)
 
 				#Compute metrics
-				metrics = metric(Y.int(), Y_pred.round().int())
+				metrics = metric(Y.int(), Y_pred.squeeze(1).round().int())
 
 				#Backprop loss
 				loss.backward()
