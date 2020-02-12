@@ -1,7 +1,7 @@
 # DivNet
 Neural network for dividing seismic facies.
 
-**Easy start**
+**Start with this**
 ```
 pip install -r requirements.txt
 python download.py
