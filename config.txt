@@ -9,11 +9,12 @@
 	'SEISMIC_FILENAME': 'seismic.npy',
 
 	#Model settings
-	'LOAD_MODEL': True,
+	'LOAD_MODEL': False,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
 	'MODEL_NAME': 'U-Net',
 	'MODEL_SUFFIX': '.torch',
+	'USE_DECONV_LAYERS': True,
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 1,
 

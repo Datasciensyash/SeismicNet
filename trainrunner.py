@@ -38,7 +38,7 @@ class TrainRunner():
 		self.metric = self.init_metric()
 
 		#Initialization of augmentation function
-		self.aug_img, self.aug_all = self.init_augmentation(CONFIGURATION)
+		self.aug = self.init_augmentation(CONFIGURATION)
 
 		self.CONFIGURATION = CONFIGURATION
 
@@ -93,8 +93,6 @@ class TrainRunner():
 			Int: CROP_SIZE_WIDTH -> Width of Image crop
 			Float: VERTICAL_FLIP_PROBA -> Probability of vertical flipping the image
 			Float: HORIZONTAL_FLIP_PROBA -> Probability of horizontal flipping the image
-			Float: GAUSS_NOISE_PROBA -> Probability of preforming gauss noise to image
-			Float: GAUSS_NOISE_MAX -> Maximum value of gauss noise
 
 		Returns: Augmentation function (albumentations.Compose)
 		"""
@@ -158,7 +156,7 @@ class TrainRunner():
 
 		return x_data, y_data
 
-	def get_dataloader(self, seismic, borders, aug_img, aug_all, batch_size, shuffle, dtype='Train'):
+	def get_dataloader(self, seismic, borders, aug, batch_size, shuffle, dtype='Train'):
 		"""
 		Creates dataloader instance.
 			np.array: seismic -> Numpy array with seismic data
@@ -186,7 +184,7 @@ class TrainRunner():
 		CONFIGURATION = self.CONFIGURATION
 		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.MODEL_NAME)
 		seismic, borders = self.get_data(path, CONFIGURATION.MASK_FILENAME, CONFIGURATION.SEISMIC_FILENAME)
-		self.dataloader = self.get_dataloader(seismic, borders, self.aug_img, self.aug_all, CONFIGURATION.BATCH_SIZE, CONFIGURATION.SHUFFLE_TRAIN)
+		self.dataloader = self.get_dataloader(seismic=seismic, borders=borders, aug=self.aug, batch_size=CONFIGURATION.BATCH_SIZE, shuffle=CONFIGURATION.SHUFFLE_TRAIN, dtype='Train')
 		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH, CONFIGURATION.MODEL_NAME)
 		LOGGER.write_to_file()
 
@@ -250,7 +248,7 @@ class TrainRunner():
 		CONFIGURATION = self.CONFIGURATION
 		name = CONFIGURATION.MODEL_NAME
 		seismic, borders = self.get_data(path, seismicname=data_name)
-		self.dataloader = self.get_dataloader(seismic, borders, self.aug_img, False, False, dtype='Test')
+		self.dataloader = self.get_dataloader(seismic=seismic, borders=borders, aug=self.aug, batch_size=1, shuffle=False, dtype='Test')
 		self.predict_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
 
 	def predict_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='None', SAVEPATH='output/predictions/'):
