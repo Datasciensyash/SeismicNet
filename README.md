@@ -17,10 +17,19 @@ For training and validating we will use [Netherlands F3 dataset](https://github.
 
 ![Transformation](images/tr.png)
 
-Since the seismic cube is 3D data we can get two types of vertical sections along two axes. In seismic exploration, they are called inlines and crosslines. This is a very useful property that allows you to get more training examples.
+Since the seismic cube is 3D data we can get two types of vertical sections along two axes. In seismic exploration, they are called inlines and crosslines. This is a very useful property that allows you to get more training examples. Below is an example of crossline and inline.
 
 ![Inlines and crosslines](images/icl.png)
 
+We performed train and validation split and get following shapes of data sets.
+| Data split       | Num of Inlines           | Num of Crosslines  | Size percentage |
+| ------------- |:-------------:| -----:|-----:|
+| All | 581 | 701 | 100% |
+| Train      | 401 | 701 | 69% |
+| Validation      | 180     |   701 | 21 % |
+
+---
+## Dataset preparation
 ## Reproducibility
 ```
 pip install -r requirements.txt
