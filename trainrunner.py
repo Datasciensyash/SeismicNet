@@ -5,7 +5,7 @@ from modules.config import Config
 from modules.logger import LogHolder
 
 from modules.dataset import SeismicDataset
-from modules.augmentations import VerticalShift, HorizontalShift, InvertImg
+from modules.augmentations import InvertImg
 
 from model.unet import UNet
 
@@ -23,7 +23,7 @@ class TrainRunner():
 		CONFIGURATION = Config(config_file)
 
 		#Initialization of model
-		self.model = self.init_model(CONFIGURATION.CHANNELS_IN, CONFIGURATION.CHANNELS_OUT, CONFIGURATION.LOAD_MODEL, CONFIGURATION.MODEL_LOAD_PATH, CONFIGURATION.MODEL_NAME)
+		self.model = self.init_model(CONFIGURATION.CHANNELS_IN, CONFIGURATION.CHANNELS_OUT, CONFIGURATION.LOAD_MODEL, CONFIGURATION.MODEL_LOAD_PATH, CONFIGURATION.MODEL_NAME, CONFIGURATION.MODEL_SUFFIX, CONFIGURATION.USE_DECONV_LAYERS)
 
 		#Initialization of device
 		self.device = self.init_device(CONFIGURATION.DEVICE)
@@ -32,19 +32,19 @@ class TrainRunner():
 		self.optimizer = self.init_optimizer(CONFIGURATION.ADAM_LR, self.model.parameters())
 
 		#Initialization of loss function
-		self.criterion = self.init_criterion(CONFIGURATION.CLASS_WEIGHT_0, CONFIGURATION.CLASS_WEIGHT_1, self.device)
+		self.criterion = self.init_criterion(CONFIGURATION.CLASS_WEIGHT_0, CONFIGURATION.CLASS_WEIGHT_1, CONFIGURATION.BCE_MODIFIER, self.device)
 
 		#Initialization of metric function
 		self.metric = self.init_metric()
 
 		#Initialization of augmentation function
-		self.aug = self.init_augmentation(CONFIGURATION)
+		self.aug_img, self.aug_all = self.init_augmentation(CONFIGURATION)
 
 		self.CONFIGURATION = CONFIGURATION
 
 	
 
-	def init_model(self, CHANNELS_IN, CHANNELS_OUT, LOAD_MODEL, MODEL_LOAD_PATH, MODEL_NAME):
+	def init_model(self, CHANNELS_IN, CHANNELS_OUT, LOAD_MODEL, MODEL_LOAD_PATH, MODEL_NAME, MODEL_SUFFIX, USE_DECONV_LAYERS):
 		"""
 		Initialization and loading model if needed.
 			Int: CHANNELS_IN -> Number of input channels in UNet
@@ -56,9 +56,9 @@ class TrainRunner():
 		Returns: Model
 		"""
 
-		model = UNet(CHANNELS_IN, CHANNELS_OUT, False)
+		model = UNet(CHANNELS_IN, CHANNELS_OUT, not USE_DECONV_LAYERS)
 		if LOAD_MODEL:
-			model_state_dict = torch.load(MODEL_LOAD_PATH + MODEL_NAME + '.torch')
+			model_state_dict = torch.load(MODEL_LOAD_PATH + MODEL_NAME + MODEL_SUFFIX)
 			model.load_state_dict(model_state_dict)
 		return model
 
@@ -73,21 +73,22 @@ class TrainRunner():
 		optimizer = torch.optim.Adam(parameters, lr=ADAM_LR)
 		return optimizer
 
-	def init_criterion(self, CLASS_WEIGHT_0, CLASS_WEIGHT_1, device):
+	def init_criterion(self, CLASS_WEIGHT_0, CLASS_WEIGHT_1, BCE_MODIFIER, device):
 		"""
 		Initialization of loss function:
 			Float: CLASS_WEIGHT_0 -> Weight for class 0
 			Float: CLASS_WEIGHT_1 -> Weight for class 1
 
-		Returns: lambda function defined as: 0.85 * weighted_binary_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
+		Returns: lambda function defined as: BCE_MODIFIER * weighted_binary_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
-		criterion = lambda y, y_pred: 0.85 * bce_loss(y, y_pred) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
+		criterion = lambda y, y_pred: BCE_MODIFIER * bce_loss(y, y_pred) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		return criterion
 
 	def init_augmentation(self, CONFIGURATION):
 		"""
 		Initialization of augmentation function
+		Parameters stored in CONFIGURATION.
 			Int: CROP_SIZE_HEIGHT -> Height of Image crop
 			Int: CROP_SIZE_WIDTH -> Width of Image crop
 			Float: VERTICAL_FLIP_PROBA -> Probability of vertical flipping the image
@@ -97,22 +98,43 @@ class TrainRunner():
 
 		Returns: Augmentation function (albumentations.Compose)
 		"""
+
 		augmentation = albumentations.Compose([
-			albumentations.RandomCrop(CONFIGURATION.CROP_SIZE_HEIGHT, CONFIGURATION.CROP_SIZE_WIDTH, p=1.0),
-			albumentations.HorizontalFlip(p=CONFIGURATION.HORIZONTAL_FLIP_PROBA),
-			albumentations.VerticalFlip(p=CONFIGURATION.VERTICAL_FLIP_PROBA),
-			albumentations.GaussNoise(var_limit=CONFIGURATION.GAUSS_NOISE_MAX, p=CONFIGURATION.GAUSS_NOISE_PROBA),
+			InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA),
 			albumentations.Cutout(num_holes=CONFIGURATION.NUM_HOLES, max_h_size=CONFIGURATION.HOLE_SIZE, max_w_size=CONFIGURATION.HOLE_SIZE, p=CONFIGURATION.CUTOUT_PROBA),
 			albumentations.Blur(blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA),
 			albumentations.OneOf([
 				albumentations.RandomBrightness(p=0.5),
 				albumentations.RandomBrightnessContrast(p=0.5),				
-				], p=0.5),
-			HorizontalShift(shift_width=(3, 6), shift_height=(2, 4), shift_p=0.1, p=0.1),
-			InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA)	
+				], p=CONFIGURATION.RANDOM_BRIGHTNESS_PROBA),
+			albumentations.RandomCrop(CONFIGURATION.CROP_SIZE_HEIGHT, CONFIGURATION.CROP_SIZE_WIDTH, p=1.0),
+			albumentations.HorizontalFlip(p=CONFIGURATION.HORIZONTAL_FLIP_PROBA),
+			albumentations.VerticalFlip(p=CONFIGURATION.VERTICAL_FLIP_PROBA),
 			])
 
+
 		return augmentation
+
+	def init_device(self, DEVICE):
+		"""
+		Initialization of torch.Device.
+			Str: Device -> Device type (cpu / cuda:N)
+
+		Returns: torch.Device
+		"""
+
+		device = torch.device(DEVICE)
+		return device
+
+	def init_metric(self):
+		"""
+		Initialization of IoU Metric
+			(Implementation from https://www.kaggle.com/iezepov/fast-iou-scoring-metric-in-pytorch-and-numpy)
+
+		Returns: lambda function that computes IoU Metric.
+		"""
+
+		return lambda y, y_pred: iou_pytorch(y_pred.cpu(), y.cpu())
 
 	def get_data(self, path, bordername='borders.npy', seismicname='seismic.npy'):
 		"""
@@ -136,7 +158,7 @@ class TrainRunner():
 
 		return x_data, y_data
 
-	def get_dataloader(self, seismic, borders, aug, batch_size, shuffle, dtype='Train'):
+	def get_dataloader(self, seismic, borders, aug_img, aug_all, batch_size, shuffle, dtype='Train'):
 		"""
 		Creates dataloader instance.
 			np.array: seismic -> Numpy array with seismic data
@@ -155,27 +177,6 @@ class TrainRunner():
 
 		return dataloader
 
-	def init_device(self, DEVICE):
-		"""
-		Initialization of torch.Device.
-			Str: Device -> Device type (cpu / cuda:N)
-
-		Returns: torch.Device
-		"""
-
-		device = torch.device(DEVICE)
-		return device
-
-	def init_metric(self):
-		"""
-		Initialization of IoU Metric
-			(Implementation from https://www.kaggle.com/iezepov/fast-iou-scoring-metric-in-pytorch-and-numpy)
-
-		Returns: lambda function that computes IoU Metric.
-		"""
-
-		return lambda y, y_pred: iou_pytorch(y_pred.cpu(), y.cpu())
-
 	def train(self, path):
 		"""
 		Function to auto-train model.
@@ -184,8 +185,8 @@ class TrainRunner():
 
 		CONFIGURATION = self.CONFIGURATION
 		LOGGER = LogHolder(CONFIGURATION.LOGDIR, CONFIGURATION.MODEL_NAME)
-		seismic, borders = self.get_data(path)
-		self.dataloader = self.get_dataloader(seismic, borders, self.aug, CONFIGURATION.BATCH_SIZE, True)
+		seismic, borders = self.get_data(path, CONFIGURATION.MASK_FILENAME, CONFIGURATION.SEISMIC_FILENAME)
+		self.dataloader = self.get_dataloader(seismic, borders, self.aug_img, self.aug_all, CONFIGURATION.BATCH_SIZE, CONFIGURATION.SHUFFLE_TRAIN)
 		self.train_loop(self.model, self.optimizer, self.criterion, self.metric, self.dataloader, self.device, LOGGER, CONFIGURATION.NUM_EPOCHS, CONFIGURATION.CHECKPOINT_EVERY_N_EPOCHS, CONFIGURATION.MODEL_SAVE_PATH, CONFIGURATION.MODEL_NAME)
 		LOGGER.write_to_file()
 
@@ -249,7 +250,7 @@ class TrainRunner():
 		CONFIGURATION = self.CONFIGURATION
 		name = CONFIGURATION.MODEL_NAME
 		seismic, borders = self.get_data(path, seismicname=data_name)
-		self.dataloader = self.get_dataloader(seismic, borders, False, 1, False, dtype='Test')
+		self.dataloader = self.get_dataloader(seismic, borders, self.aug_img, False, False, dtype='Test')
 		self.predict_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name)
 
 	def predict_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='None', SAVEPATH='output/predictions/'):

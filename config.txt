@@ -1,21 +1,29 @@
 {
 	#Training settings
 	'BATCH_SIZE': 32,
+	'SHUFFLE_TRAIN': True,
+	'AX_REVERSE_PROBA': 0.1,
+	
+	#DATA STORING SETTINGS
+	'MASK_FILENAME': 'borders.npy',
+	'SEISMIC_FILENAME': 'seismic.npy',
 
 	#Model settings
 	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'DU-Net',
+	'MODEL_NAME': 'U-Net',
+	'MODEL_SUFFIX': '.torch',
 	'CHANNELS_IN': 1,
 	'CHANNELS_OUT': 1,
 
 	#Optimizer settings
 	'ADAM_LR': 0.000146,
 
-	#Weighted cross-entropy settings
+	#Loss settings
 	'CLASS_WEIGHT_0': 0.45,
 	'CLASS_WEIGHT_1': 0.55,
+	'BCE_MODIFIER': 0.85,
 
 	#Training process settings
 	'NUM_EPOCHS': 250,
@@ -31,20 +39,13 @@
 	'CROP_SIZE_WIDTH': 48,
 	'VERTICAL_FLIP_PROBA': 0.3,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
-	'GAUSS_NOISE_PROBA': 0.01,
-	'GAUSS_NOISE_MAX': 0.01,
-	'NUM_HOLES': 25,
+	'NUM_HOLES': 40,
 	'HOLE_SIZE': 2,
 	'CUTOUT_PROBA': 0.1,
-	'HS_PROBA': 0.6,
-	'HS_WIDTH_MIN': 4,
-	'HS_WIDTH_MAX': 5,
-	'HS_HEIGHT_MIN': 1,
-	'HS_HEIGHT_MAX': 5,
-	'HS_SHIFT_PROBA': 0.1,
-	'BLUR_LIMIT': 7,
+	'BLUR_LIMIT': 12,
 	'BLUR_PROBA': 0.4,
 	'INVERT_IMG_PROBA': 0.5,
+	'RANDOM_BRIGHTNESS_PROBA': 0.5,
 
 	#Logging settings
 	'LOGDIR': 'output/logs/',
@@ -52,4 +53,5 @@
 
 	#CHECKPOINT SETTINGS
 	'CHECKPOINT_EVERY_N_EPOCHS': 50,
+
 }

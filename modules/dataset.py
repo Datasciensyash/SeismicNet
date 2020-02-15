@@ -31,8 +31,6 @@ class SeismicDataset(Dataset):
         self.train_Y = np.swapaxes(self.train_Y, 0, 1)        
         
     def __len__(self):
-
-
         if self.dtype == 'Train' and random.random() < self.reverse_chance:
             self.swap_axes()
             
@@ -40,8 +38,8 @@ class SeismicDataset(Dataset):
     
     def __getitem__(self, idx):
         if self.dtype == 'Train':
-            augmented = self.aug(image=self.train_X[idx], mask=self.train_Y[idx])
-            img, mask = torch.Tensor(augmented['image']), torch.Tensor(augmented['mask'])  
+            augmented = self.aug(**{'image': self.train_X[idx], 'mask':self.train_Y[idx]})
+            img, mask = torch.Tensor(augmented['image']), torch.Tensor(augmented['mask'])
             return img, mask
 
         elif self.dtype == 'Test':

@@ -72,19 +72,6 @@ class OutConv(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
-class ConvDecoder(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(ConvDecoder, self).__init__()
-        self.conv_1 = DoubleConv(in_channels, in_channels)
-        self.conv_2 = DoubleConv(in_channels, out_channels)
-        self.conv_3 = DoubleConv(out_channels, out_channels)
-
-    def forward(self, x):
-        x = self.conv_1(x)
-        x = self.conv_2(x)
-        x = self.conv_3(x)
-        return x
-
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, bilinear=True):
         super(UNet, self).__init__()
@@ -101,8 +88,7 @@ class UNet(nn.Module):
         self.up2 = Up(512, 128, bilinear)
         self.up3 = Up(256, 64, bilinear)
         self.up4 = Up(128, 64, bilinear)
-        self.last_conv = ConvDecoder(64, 128)
-        self.outc = OutConv(128, n_classes)
+        self.outc = OutConv(64, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -114,7 +100,6 @@ class UNet(nn.Module):
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        x = self.last_conv(x)
         output_x = self.outc(x)
         if self.n_classes == 1:
             return F.sigmoid(output_x)
