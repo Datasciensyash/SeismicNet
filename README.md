@@ -42,7 +42,15 @@ Let's see the class distribution.
 
 Data augmentation helps to train models with better generalization, which is extremely beneficial to us because of the very limited dataset for training. During augmentation, sections of the seismic cube were interpreted as grayscale images. However, unlike the standard tasks of computer vision, we must choose augmentations very carefully, focusing on a different nature of the data. For training we chose the following augmentations:
 
-![Augmentations](images/aug.png)
+![Augmentations](images/augmentations.png)
+
+All these augmentations was chosen by following our ideas about data. Seismic data is wave reflection data, and seismic horizons are the most clearly reflected waves. As we know, waves have two phases, which in our image are in the intervals from 0 to 0.5 and from 0.5 to 1. The sharpness of wave reflection in each phase can be estimated as the L1 distance to 0 or 1, respectively. 
+
+This is what underlies the seismic color map.
+
+![CMAP](images/cmap.png)
+
+This information allows us to understand which augmentations can be applied to seismic data and which cannot. Perhaps the most important augmentation is the color inversion since it allows the neural network to learn the horizon color invariance. Seismic data is invariant to horizontal flipping, so choosing this augmentation was clear enough. Gaussian blur is also a very important augmentation, which removes unnecessary reflections and leaves only the clearest ones. All remaining augmentations are applied for reasons of better generalization of the model.
 
 ## Reproducibility
 ```
