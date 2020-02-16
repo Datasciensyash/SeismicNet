@@ -26,7 +26,7 @@ We performed train and validation split and get following shapes of data sets. I
 | ------------- |:-------------:| -----:|-----:|
 | All | 581 | 701 | 100% |
 | Train      | 401 | 701 | 69% |
-| Validation      | 180     |   701 | 21 % |
+| Validation      | 180     |   701 | 21% |
 
 ---
 ## Dataset preparation and augmentations.
@@ -52,6 +52,24 @@ This is what underlies the seismic color map.
 
 This information allows us to understand which augmentations can be applied to seismic data and which cannot. Perhaps the most important augmentation is the color inversion since it allows the neural network to learn the horizon color invariance. Seismic data is invariant to horizontal flipping, so choosing this augmentation was clear enough. Gaussian blur is also a very important augmentation, which removes unnecessary reflections and leaves only the clearest ones. All remaining augmentations are applied for reasons of better generalization of the model.
 
+---
+
+## Metric and loss function
+Since horizon detection is the binary segmentation problem we will use metrics and loss functions applied to segmentation. It is worth remembering that our task is faced with the problem of class imbalance, which also affects the choice of loss functions. Good choice for imbalanced classification (binary segmentation is a classification problem) is Dice and Jaccard (also known as Intersection over Union) metrics and loss functions. Also, we will use binary cross-entropy loss as well.
+
+Finally, the loss function for our task will be defined as:
+```
+loss = alpha * Weighted_binary_cross_entropy(weight_1, weight_2) + beta * JaccardLoss + gamma * DiceLoss
+```
+Where alpha, beta, gamma, weight_1 and weight_2 are hyperparameters.
+
+And our main metric will be Intersection over Union.
+![IoU](images/iou_equation.png)
+
+## Model and training
+In this work we use U-Net architecture with one input channel and one output channel.
+
+---
 ## Reproducibility
 ```
 pip install -r requirements.txt
