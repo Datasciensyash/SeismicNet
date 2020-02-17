@@ -1,6 +1,6 @@
 {
 	#Training settings
-	'BATCH_SIZE': 32,
+	'BATCH_SIZE': 48,
 	'SHUFFLE_TRAIN': True,
 	'AX_REVERSE_PROBA': 0.1,
 	
@@ -9,7 +9,7 @@
 	'SEISMIC_FILENAME': 'seismic.npy',
 
 	#Model settings
-	'LOAD_MODEL': False,
+	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
 	'MODEL_NAME': 'U-Net',
@@ -24,10 +24,10 @@
 	#Loss settings
 	'CLASS_WEIGHT_0': 0.45,
 	'CLASS_WEIGHT_1': 0.55,
-	'BCE_MODIFIER': 0.85,
+	'LOSS_MODIFIERS': [0.85, 1.0, 1.0],
 
 	#Training process settings
-	'NUM_EPOCHS': 250,
+	'NUM_EPOCHS': 128,
 
 	#Output settings
 	'THRESHOLD': 0.5,
@@ -36,17 +36,23 @@
 	'DEVICE': 'cuda:0',
 
 	#Augmentation settings
-	'CROP_SIZE_HEIGHT': 48,
-	'CROP_SIZE_WIDTH': 48,
-	'VERTICAL_FLIP_PROBA': 0.3,
+	'CROP_SIZE_HEIGHT': 64,
+	'CROP_SIZE_WIDTH': 96,
 	'HORIZONTAL_FLIP_PROBA': 0.5,
 	'NUM_HOLES': 40,
 	'HOLE_SIZE': 2,
-	'CUTOUT_PROBA': 0.1,
+	'CUTOUT_PROBA': 0.2,
 	'BLUR_LIMIT': 12,
 	'BLUR_PROBA': 0.4,
 	'INVERT_IMG_PROBA': 0.5,
-	'RANDOM_BRIGHTNESS_PROBA': 0.5,
+	'SCALE_MIN': 0.55,
+	'SCALE_MAX': 0.75,
+	'DOWNSCALE_PROBA': 0.1,
+	'SCR_PROBA': 0.2,
+	'SCR_SHIFT_LIMIT': 0.0625,
+	'SCR_SCALE_LIMIT': 0.2,
+	'SCR_ROTATE_LIMIT': 5,
+
 
 	#Logging settings
 	'LOGDIR': 'output/logs/',

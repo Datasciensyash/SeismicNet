@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 from modules.metrics import iou_numpy
+import matplotlib.pyplot as plt 
 
 @st.cache
 def iou_score(mask, predicted, tr=0.5):
@@ -28,8 +29,8 @@ def threshold_mask(mask, tr):
 @st.cache
 def load_array(ORIGINAL_DATA_SEISMIC, ORIGINAL_DATA_MASK, OUT_DATA_MASK_DIR, OUT_DATA_MASK):
 	seismic = min_max_norm(np.load(ORIGINAL_DATA_SEISMIC))
-	mask = 1 - np.load(ORIGINAL_DATA_MASK).astype('uint8')
-	predicted = 1 - np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK)
+	mask = np.load(ORIGINAL_DATA_MASK).astype('uint8')
+	predicted = min_max_norm(np.load(OUT_DATA_MASK_DIR + OUT_DATA_MASK))
 	return seismic, mask, predicted
 
 @st.cache
@@ -72,11 +73,11 @@ ORIGINAL_DATA_MASK = st.sidebar.text_input('Path to original mask data', value='
 OUT_DATA_MASK_DIR = st.sidebar.text_input('Path to output mask data directory', value='output/predictions/')
 OUT_DATA_MASK = st.sidebar.selectbox('Select filename', os.listdir(OUT_DATA_MASK_DIR))
 
-
 SHOW_GRAPH = st.sidebar.checkbox('Show statistics', value=False)
 SHOW_TTM_GRAPH = st.sidebar.checkbox('Show ttm graph', value=False)
 SHOW_IMAGES = st.sidebar.checkbox('Show images', value=False)
 
+PLT = st.sidebar.checkbox('Use matplotlib?', value=False)
 #Loading arrays
 seismic, mask, predicted = load_array(ORIGINAL_DATA_SEISMIC, ORIGINAL_DATA_MASK, OUT_DATA_MASK_DIR, OUT_DATA_MASK)
 #
@@ -101,7 +102,8 @@ if SHOW_GRAPH:
 		st.info(f'Err. mean val: {mean} ± {std}')
 
 if SHOW_TTM_GRAPH:
-    ttm_mean, ttm_std, index = threshold_to_metrics(mask, predicted, 0, 1, 0.01)
+    ttm_step = st.sidebar.slider('Step value',min_value=0.001, max_value=0.1, step=0.001, value=0.01)
+    ttm_mean, ttm_std, index = threshold_to_metrics(mask, predicted, 0, 1, ttm_step)
     st.success(f'Max. IoU: {round(np.max(ttm_mean), 4)} with THRESHOLD = {round(index[np.argmax(ttm_mean)], 4)}')
     visualize_ttm(ttm_mean, ttm_std, index)	
 
@@ -111,5 +113,25 @@ if SHOW_IMAGES:
 	mask = min_max_norm(mask)
 	predicted_ = min_max_norm(threshold_mask(predicted, tr))
 	predicted = min_max_norm(predicted)
-	st.image([seismic[idx].T, mask[idx].T, predicted_[idx].T, predicted[idx].T], caption=['Seismic data', 'Ground truth', f'(Thresolded) Predicted with IoU {round(metrics[idx], 3)}', f'Predicted with IoU {round(metrics[idx], 3)}'])
+
+	if PLT:
+		fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(16, 8))
+		ax[0][0].imshow(seismic[idx].T, cmap='seismic')
+		ax[0][0].set_title('Seismic data')
+
+		#ax[0][1].imshow(seismic[idx].T)
+		ax[0][1].imshow(mask[idx].T, alpha=1, cmap='seismic')
+		ax[0][1].set_title('Ground truth mask')
+
+		ax[1][0].imshow(predicted[idx].T, alpha=1.0, cmap='seismic')
+		ax[1][0].set_title('Predicted mask')
+
+		#ax[1][1].imshow(seismic[idx].T)
+		ax[1][1].imshow(predicted_[idx].T, alpha=1, cmap='seismic')
+		ax[1][1].set_title(f'Thresolded mask with IoU: {round(metrics[idx], 3)}')
+
+		st.pyplot()		
+
+	else:
+		st.image([seismic[idx].T, mask[idx].T, predicted_[idx].T, predicted[idx].T], caption=['Seismic data', 'Ground truth', f'Thresolded with IoU {round(metrics[idx], 3)}', 'Predicted mask'])
 
