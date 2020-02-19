@@ -7,7 +7,10 @@ class SeismicDataset(Dataset):
     def __init__(self, train_X, train_Y, aug, dtype='Train', normalize=True, reverse_chance=0.1):
 
         self.train_X = train_X.astype('float32')
-        self.train_Y = train_Y.astype('float32')
+        if type(train_Y) == np.array:
+            self.train_Y = train_Y.astype('float32')
+        else:
+            self.train_Y = self.train_X.copy()
         self.aug = aug
         self.dtype = dtype
         self.reverse_chance = reverse_chance

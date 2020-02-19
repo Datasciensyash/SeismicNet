@@ -99,10 +99,10 @@ class TrainRunner():
 
 		augmentation = albumentations.Compose([
 			InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA),
-			albumentations.ShiftScaleRotate(p=CONFIGURATION.SCR_PROBA, shift_limit=CONFIGURATION.SCR_SHIFT_LIMIT, scale_limit=CONFIGURATION.SCR_SCALE_LIMIT, rotate_limit=CONFIGURATION.SCR_ROTATE_LIMIT)
-			albumentations.GaussianBlur(blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA)
+			albumentations.ShiftScaleRotate(p=CONFIGURATION.SCR_PROBA, shift_limit=CONFIGURATION.SCR_SHIFT_LIMIT, scale_limit=CONFIGURATION.SCR_SCALE_LIMIT, rotate_limit=CONFIGURATION.SCR_ROTATE_LIMIT),
+			albumentations.GaussianBlur(blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA),
 			albumentations.Cutout(num_holes=CONFIGURATION.NUM_HOLES, max_h_size=CONFIGURATION.HOLE_SIZE, max_w_size=CONFIGURATION.HOLE_SIZE, p=CONFIGURATION.CUTOUT_PROBA),
-			albumentations.Downscale(scale_min=CONFIGURATION.SCALE_MIN, scale_max=CONFIGURATION.SCALE_MAX, p=CONFIGURATION.DOWNSCALE_PROBA)
+			albumentations.Downscale(scale_min=CONFIGURATION.SCALE_MIN, scale_max=CONFIGURATION.SCALE_MAX, p=CONFIGURATION.DOWNSCALE_PROBA),
 			albumentations.RandomCrop(CONFIGURATION.CROP_SIZE_HEIGHT, CONFIGURATION.CROP_SIZE_WIDTH, p=1.0),
 			albumentations.HorizontalFlip(p=CONFIGURATION.HORIZONTAL_FLIP_PROBA),
 			])

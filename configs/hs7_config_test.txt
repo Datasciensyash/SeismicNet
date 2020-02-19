@@ -1,3 +1,5 @@
+#[Training] Configuration for H-Net experiment 4: Horizon_size = 7
+
 {
 	#Training settings
 	'BATCH_SIZE': 48,
@@ -5,14 +7,14 @@
 	'AX_REVERSE_PROBA': 0.1,
 	
 	#DATA STORING SETTINGS
-	'MASK_FILENAME': 'horizons_5.npy',
+	'MASK_FILENAME': 'horizons_7.npy',
 	'SEISMIC_FILENAME': 'seismic.npy',
 
 	#Model settings
 	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'H-NET-5',
+	'MODEL_NAME': 'H-NET-HS7',
 	'MODEL_SUFFIX': '.torch',
 	'USE_DECONV_LAYERS': True,
 	'CHANNELS_IN': 1,
@@ -27,7 +29,7 @@
 	'LOSS_MODIFIER': [0.85, 1.0, 1.0],
 
 	#Training process settings
-	'NUM_EPOCHS': 32,
+	'NUM_EPOCHS': 128,
 
 	#Output settings
 	'THRESHOLD': 0.5,
@@ -56,7 +58,7 @@
 
 	#Logging settings
 	'LOGDIR': 'output/logs/',
-	'LOGNAME': '',
+	'LOGNAME': 'HS7',
 
 	#CHECKPOINT SETTINGS
 	'CHECKPOINT_EVERY_N_EPOCHS': 50,
