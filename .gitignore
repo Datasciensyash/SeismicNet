@@ -2,3 +2,4 @@
 *.torch
 explore.py
 reverse.py
+output/*.png
