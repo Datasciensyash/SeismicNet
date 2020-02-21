@@ -2,8 +2,8 @@ import wget
 import os
 from pyunpack import Archive
 
-DATA_URL = 'https://getfile.dokpub.com/yandex/get/https://yadi.sk/d/QDcinlASTLmpig'
-DATA_NAME = 'Data.zip'
+DATA_URL = 'https://getfile.dokpub.com/yandex/get/https://yadi.sk/d/S1pixQPakJ_nJw'
+DATA_NAME = 'data.zip'
 EXTRACT_PATH = ''
 
 if __name__ == '__main__':

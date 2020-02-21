@@ -1,5 +1,4 @@
 *.npy
-*.torch
-explore.py
+experiments.py
 reverse.py
 output/*.png
