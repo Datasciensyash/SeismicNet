@@ -67,7 +67,15 @@ And our main metric will be Intersection over Union.
 ![IoU](images/iou_equation.png)
 
 ## Model and training
-In this work we use U-Net architecture with one input channel and one output channel. As an improvement, we added a batch normalization. This architecture works really good in segmentation tasks with small amout of classes. 
+In this work we use U-Net architecture with one input channel and one output channel, and as an improvement, we added a batch normalization. This model architecture showing good results in segmentation tasks with small amout of classes.
+
+We conducted several experiments with different horizont thickness and train same model with same hyperparameters for 128 epochs.
+Results are showed in this plots:
+
+![Horizon thickness 1](images/Horizon thickness 1-train.png)
+![Horizon thickness 1](images/Horizon thickness 1-pred.png)
+
+
 
 ---
 ## Reproducibility
