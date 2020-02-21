@@ -128,7 +128,7 @@ if SHOW_IMAGES:
 
 		#ax[1][1].imshow(seismic[idx].T)
 		ax[1][1].imshow(predicted_[idx].T, alpha=1, cmap='seismic')
-		ax[1][1].set_title(f'Thresolded mask with IoU: {round(metrics[idx], 3)}')
+		ax[1][1].set_title(f'Thresholded mask with IoU: {round(metrics[idx], 3)}')
 
 		st.pyplot()		
 
