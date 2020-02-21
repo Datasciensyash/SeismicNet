@@ -72,7 +72,7 @@ In this work we use U-Net architecture with one input channel and one output cha
 We conducted several experiments with different horizont thickness and train same model with same hyperparameters for 128 epochs.
 Results are showed in this plots:
 
-![Horizon thickness 1](images/Horizon thickness 1-train.png)
+![Horizon thickness 1](images/Horizon_thickness_1-train.png)
 ![Horizon thickness 1](images/Horizon thickness 1-pred.png)
 
 
