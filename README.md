@@ -35,10 +35,10 @@ In this section we describe data preparation and in particular data augmentation
 In each classification task, there is a problem of class imbalance. And in our case, this problem is most acute: seismic horizons occupy a very small part of the sections of the seismic cube. The solution to the problem may be the correct selection of the thickness of the horizon. We can well make the horizon more than one pixel in thickness, because the marking of the horizon occurs with strong assumptions. Expanding the boundary, we also increase the likelihood that a seismic horizon is actually located in the marked area. The best experimental thickness is 3 and 5.
 
 Let's see the class distribution.
-| Class       | Percentage if thickness is 1| Percentage if thickness is 3| Percentage if thickness is 5|
-| :-------------: |:-------------:| :-------------:|:-------------:|
-| Empty | 97.9% | 95.9% | 94.1% |
-| Horizon      | 2.1% | 4.1% | 5.9% |
+| Class       | Percentage if thickness is 1| Percentage if thickness is 3| Percentage if thickness is 5| Percentage if thickness is 7|
+| :-------------: |:-------------:| :-------------:|:-------------:| :-------------:|
+| Empty | 97.9% | 95.9% | 94.1% | 92.4% |
+| Horizon      | 2.1% | 4.1% | 5.9% | 7.6% | 
 
 Data augmentation helps to train models with better generalization, which is extremely beneficial to us because of the very limited dataset for training. During augmentation, sections of the seismic cube were interpreted as grayscale images. However, unlike the standard tasks of computer vision, we must choose augmentations very carefully, focusing on a different nature of the data. For training we chose the following augmentations:
 
@@ -85,14 +85,26 @@ The trained model shows good results in the segmentation of horizons well traced
 
 However, the presented model has an obvious advantage over traditional methods of correlation of seismic horizons: it is very wrong only in places of breaking faults, while classical models lose the horizon and are mistaken everywhere after a breaking faults.
 
-## Problems with
+## Usability and further research
+This model can be used as a support for other methods for detecting seismic horizons, such as horizon tracking. To improve the performance of the model, information on breaking faults is needed, therefore, further research on their segmentation is necessary.
 
 ---
-## Reproducibility
+## Reproducibility of research
+If you want to check the results or use the model in any way known to you, you can do this following this steps.
+
 ```
+#Install required libraries
 pip install -r requirements.txt
+
+#Download data
 python download.py
-python train.py --config config.txt
-python inference.py --config config.txt --path data/valid/
+
+#Train your model (if needed)
+python train.py --config config.txt --path data/train/
+
+#Predict something
+python predict.py --config config.txt --path data/valid/ --filename seismic.npy --suffix valid
+
+#Check results
 streamlit run explore.py
 ```
