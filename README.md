@@ -70,12 +70,17 @@ And our main metric will be Intersection over Union.
 In this work we use U-Net architecture with one input channel and one output channel, and as an improvement, we added a batch normalization. This model architecture showing good results in segmentation tasks with small amout of classes.
 
 We conducted several experiments with different horizont thickness and train same model with same hyperparameters for 128 epochs.
-Results are showed in this plots:
 
-![Horizon thickness 1](images/Horizon_thickness_1-train.png)
-![Horizon thickness 1](images/Horizon thickness 1-pred.png)
+Results of experiments are showed in this plot. At left side is training graph, at right side is validaton graph.
+![Horizon thickness experiments](images/bigplot.png)
 
+As we can see, the worst metrics values are shown by the model trained on the most imbalanced dataset with horizon thickness equal to one. All other models showing similar results with IoU value around 0.4.
 
+The best result shown by the model trained on the horizon mask with thickness equal to five.
+
+## Results
+
+## Problems with
 
 ---
 ## Reproducibility
