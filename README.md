@@ -76,9 +76,14 @@ Results of experiments are showed in this plot. At left side is training graph, 
 
 As we can see, the worst metrics values are shown by the model trained on the most imbalanced dataset with horizon thickness equal to one. All other models showing similar results with IoU value around 0.4.
 
-The best result shown by the model trained on the horizon mask with thickness equal to five.
+The best result was shown by the model trained on the horizon mask with the thickness equal to five, but using visual analysis we chose another model, which was trained on thickness equal to seven.
 
 ## Results
+The trained model shows good results in the segmentation of horizons well traced by the eye, however, it cannot cope with a complex underground relief. As we see in the picture below, the model cannot segment the horizon in a breaking fault from the bottom right and top right.
+
+![Results](images/results.png)
+
+However, the presented model has an obvious advantage over traditional methods of correlation of seismic horizons: it is very wrong only in places of breaking faults, while classical models lose the horizon and are mistaken everywhere after a breaking faults.
 
 ## Problems with
 
