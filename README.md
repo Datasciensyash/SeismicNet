@@ -23,7 +23,7 @@ Since the seismic cube is 3D data we can get two types of vertical sections alon
 
 We performed train and validation split and get following shapes of data sets. It is important to note that we dropped from original dataset those inlines that we considered corrupted.
 | Data split       | Num of Inlines           | Num of Crosslines  | Size percentage |
-| ------------- |:-------------:| -----:|-----:|
+| ------------- |:-------------:| :-----:| :-----:|
 | All | 581 | 701 | 100% |
 | Train      | 401 | 701 | 69% |
 | Validation      | 180     |   701 | 21% |
@@ -32,7 +32,7 @@ We performed train and validation split and get following shapes of data sets. I
 ## Dataset preparation and augmentations.
 In this section we describe data preparation and in particular data augmentations.
 
-In each classification task, there is a problem of class imbalance. And in our case, this problem is most acute: seismic horizons occupy a very small part of the sections of the seismic cube. The solution to the problem may be the correct selection of the thickness of the horizon. We can well make the horizon more than one pixel in thickness, because the marking of the horizon occurs with strong assumptions. Expanding the boundary, we also increase the likelihood that a seismic horizon is actually located in the marked area. The best experimental thickness is 3 and 5.
+In each classification task, there is a problem of class imbalance. And in our case, this problem is most acute: seismic horizons occupy a very small part of the sections of the seismic cube. The solution to the problem may be the correct selection of the thickness of the horizon. We can well make the horizon more than one pixel in thickness, because the marking of the horizon occurs with strong assumptions. Expanding the boundary, we also increase the likelihood that a seismic horizon is actually located in the marked area. The best experimental thickness is 5 and 7.
 
 Let's see the class distribution.
 | Class       | Percentage if thickness is 1| Percentage if thickness is 3| Percentage if thickness is 5| Percentage if thickness is 7|
