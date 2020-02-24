@@ -61,7 +61,7 @@ Finally, the loss function for our task will be defined as:
 ```
 loss = alpha * Weighted_binary_cross_entropy(weight_1, weight_2) + beta * JaccardLoss + gamma * DiceLoss
 ```
-Where alpha, beta, gamma, weight_1 and weight_2 are hyperparameters.
+Where alpha, beta, gamma, weight_1 and weight_2 are hyperparameters, chosen like 0.85, 1, 1, 0.45, 0.55.
 
 And our main metric will be Intersection over Union.
 ![IoU](images/iou_equation.png)
