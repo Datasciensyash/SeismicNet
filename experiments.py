@@ -92,23 +92,6 @@ if run:
 		st.info(f'Mean value: {scores.mean()} +/- {scores.std()}')
 		st.info(f'Max value: {scores.max()}')
 		st.info(f'Min value: {scores.min()}')		
-#exps = []
-#for experiment in range(exp):
-	#name = st.text_input(f'Exp. {experiment} name', value='BS-')
-#	train = st.selectbox(f'Exp. {experiment} train_mask', os.listdir('data/train/'))
-	#test = st.selectbox(f'Exp. {experiment} valid seismic', os.listdir('data/valid/'))
-	#exps.append([name, train, test])
-	#st.write('-------------------------------------------------')
-
-#if st.sidebar.button('RUN'):
-	#for ex in exps:
-		#cfn = change_config_file(['MODEL_NAME', 'LOAD_MODEL', 'MASK_FILENAME', 'LOGNAME'], [f'U-NET-{ex[0]}', False, ex[1], ex[0]])
-		#TrainRunner(cfn).train('data/train/')
-		#cfn = change_config_file(['LOAD_MODEL'], [True], configfile=cfn)
-		#TrainRunner(cfn).predict('data/valid/', ex[2], ex[0])
-	#st.success('Got it')
-
-
 
 
 

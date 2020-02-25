@@ -71,7 +71,7 @@ def dice_loss(true, logits, eps=1e-7):
     true_1_hot = true_1_hot.type(logits.type())
     dims = (0,) + tuple(range(2, true.ndimension()))
     intersection = torch.sum(probas * true_1_hot, dims)
-    cardinality = torch.sum(probas + true_1_hot, dims)
+    cardinality = torch.sum(probas * probas + true_1_hot*true_1_hot, dims)
     dice_loss = (2. * intersection / (cardinality + eps)).mean()
     return (1 - dice_loss)
 
