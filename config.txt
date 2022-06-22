@@ -12,7 +12,7 @@
 	'LOAD_MODEL': True,
 	'MODEL_LOAD_PATH': 'pretrained/checkpoints/',
 	'MODEL_SAVE_PATH': 'pretrained/checkpoints/',
-	'MODEL_NAME': 'U-NET-BS-5',
+	'MODEL_NAME': 'H-NET-BS-5',
 	'MODEL_SUFFIX': '.torch',
 	'USE_DECONV_LAYERS': True,
 	'CHANNELS_IN': 1,
