@@ -13,12 +13,11 @@ def bce_loss(true, logits, pos_weight=None):
     Returns:
         bce_loss: the weighted binary cross-entropy loss.
     """
-    bce_loss = F.binary_cross_entropy_with_logits(
+    return F.binary_cross_entropy_with_logits(
         logits.float(),
         true.float(),
         pos_weight=pos_weight,
     )
-    return bce_loss
 
 def ce_loss(true, logits, weights, ignore=255):
     """Computes the weighted multi-class cross-entropy loss.
@@ -32,13 +31,12 @@ def ce_loss(true, logits, weights, ignore=255):
     Returns:
         ce_loss: the weighted multi-class cross-entropy loss.
     """
-    ce_loss = F.cross_entropy(
+    return F.cross_entropy(
         logits.float(),
         true.long(),
         ignore_index=ignore,
         weight=weights,
     )
-    return ce_loss
 
 
 def dice_loss(true, logits, eps=1e-7):

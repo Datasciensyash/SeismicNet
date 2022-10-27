@@ -70,8 +70,7 @@ class TrainRunner():
 
 		Returns: Optimizer
 		"""
-		optimizer = torch.optim.Adam(parameters, lr=ADAM_LR)
-		return optimizer
+		return torch.optim.Adam(parameters, lr=ADAM_LR)
 
 	def init_criterion(self, CLASS_WEIGHT_0, CLASS_WEIGHT_1, LM, device):
 		"""
@@ -82,8 +81,11 @@ class TrainRunner():
 		Returns: lambda function defined as: BCE_MODIFIER * weighted_binary_cross_entropy(y, y_pred, weights) + jaccard_loss(y, y_pred) + dice_loss(y, y_pred)
 		"""
 		weights = torch.Tensor([CLASS_WEIGHT_0, CLASS_WEIGHT_1])
-		criterion = lambda y, y_pred: LM[0] * bce_loss(y, y_pred) + LM[1] * jaccard_loss(y, y_pred) + LM[2] * dice_loss(y, y_pred)
-		return criterion
+		return (
+			lambda y, y_pred: LM[0] * bce_loss(y, y_pred)
+			+ LM[1] * jaccard_loss(y, y_pred)
+			+ LM[2] * dice_loss(y, y_pred)
+		)
 
 	def init_augmentation(self, CONFIGURATION):
 		"""
@@ -97,18 +99,37 @@ class TrainRunner():
 		Returns: Augmentation function (albumentations.Compose)
 		"""
 
-		augmentation = albumentations.Compose([
-			InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA),
-			albumentations.ShiftScaleRotate(p=CONFIGURATION.SCR_PROBA, shift_limit=CONFIGURATION.SCR_SHIFT_LIMIT, scale_limit=CONFIGURATION.SCR_SCALE_LIMIT, rotate_limit=CONFIGURATION.SCR_ROTATE_LIMIT),
-			albumentations.GaussianBlur(blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA),
-			albumentations.Cutout(num_holes=CONFIGURATION.NUM_HOLES, max_h_size=CONFIGURATION.HOLE_SIZE, max_w_size=CONFIGURATION.HOLE_SIZE, p=CONFIGURATION.CUTOUT_PROBA),
-			albumentations.Downscale(scale_min=CONFIGURATION.SCALE_MIN, scale_max=CONFIGURATION.SCALE_MAX, p=CONFIGURATION.DOWNSCALE_PROBA),
-			albumentations.RandomCrop(CONFIGURATION.CROP_SIZE_HEIGHT, CONFIGURATION.CROP_SIZE_WIDTH, p=1.0),
-			albumentations.HorizontalFlip(p=CONFIGURATION.HORIZONTAL_FLIP_PROBA),
-			])
-
-
-		return augmentation
+		return albumentations.Compose(
+			[
+				InvertImg(p=CONFIGURATION.INVERT_IMG_PROBA),
+				albumentations.ShiftScaleRotate(
+					p=CONFIGURATION.SCR_PROBA,
+					shift_limit=CONFIGURATION.SCR_SHIFT_LIMIT,
+					scale_limit=CONFIGURATION.SCR_SCALE_LIMIT,
+					rotate_limit=CONFIGURATION.SCR_ROTATE_LIMIT,
+				),
+				albumentations.GaussianBlur(
+					blur_limit=CONFIGURATION.BLUR_LIMIT, p=CONFIGURATION.BLUR_PROBA
+				),
+				albumentations.Cutout(
+					num_holes=CONFIGURATION.NUM_HOLES,
+					max_h_size=CONFIGURATION.HOLE_SIZE,
+					max_w_size=CONFIGURATION.HOLE_SIZE,
+					p=CONFIGURATION.CUTOUT_PROBA,
+				),
+				albumentations.Downscale(
+					scale_min=CONFIGURATION.SCALE_MIN,
+					scale_max=CONFIGURATION.SCALE_MAX,
+					p=CONFIGURATION.DOWNSCALE_PROBA,
+				),
+				albumentations.RandomCrop(
+					CONFIGURATION.CROP_SIZE_HEIGHT,
+					CONFIGURATION.CROP_SIZE_WIDTH,
+					p=1.0,
+				),
+				albumentations.HorizontalFlip(p=CONFIGURATION.HORIZONTAL_FLIP_PROBA),
+			]
+		)
 
 	def init_device(self, DEVICE):
 		"""
@@ -168,9 +189,9 @@ class TrainRunner():
 
 		dataset = SeismicDataset(seismic, borders, aug, dtype=dtype)
 
-		dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=0)
-
-		return dataloader
+		return DataLoader(
+			dataset, batch_size=batch_size, shuffle=shuffle, num_workers=0
+		)
 
 	def train(self, path):
 		"""
@@ -232,8 +253,8 @@ class TrainRunner():
 				logger.write_loss(float(loss.detach().cpu()))
 
 			if (epoch + 1) % CHECKPOINT_EP == 0:
-				torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}-{epoch}ep.torch')
-			torch.save(model.state_dict(), CHECKPOINT_DIR + f'{MODELNAME}.torch')		
+				torch.save(model.state_dict(), f'{CHECKPOINT_DIR}{MODELNAME}-{epoch}ep.torch')
+			torch.save(model.state_dict(), f'{CHECKPOINT_DIR}{MODELNAME}.torch')
 		return None
 
 	def predict(self, path, data_name='seismic.npy', suffix=''):
@@ -246,7 +267,13 @@ class TrainRunner():
 		name = CONFIGURATION.MODEL_NAME
 		seismic, borders = self.get_data(path, seismicname=data_name)
 		self.dataloader = self.get_dataloader(seismic=seismic, borders=borders, aug=self.aug, batch_size=1, shuffle=False, dtype='Test')
-		self.predict_(self.model, self.dataloader, self.device, SAVE=True, SAVE_PREFIX=name + '-' + suffix)
+		self.predict_(
+			self.model,
+			self.dataloader,
+			self.device,
+			SAVE=True,
+			SAVE_PREFIX=f'{name}-{suffix}',
+		)
 
 	def predict_(self, model, dataloader, device, SAVE=True, SAVE_PREFIX='None', SAVEPATH='output/predictions/'):
 		"""
