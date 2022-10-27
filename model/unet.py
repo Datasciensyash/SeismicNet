@@ -101,7 +101,4 @@ class UNet(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         output_x = self.outc(x)
-        if self.n_classes == 1:
-            return F.sigmoid(output_x)
-        else:
-            return output_x
+        return F.sigmoid(output_x) if self.n_classes == 1 else output_x

@@ -47,7 +47,7 @@ def threshold_to_metrics(mask, predicted, minv, maxv, step):
 def get_distribution(mask, minv, maxv, step):
 	distribution = []
 	index = []
-	for i in range(0, int((maxv - minv) // step) + 1):
+	for i in range(int((maxv - minv) // step) + 1):
 		distribution.append(np.sum((mask > i * step) & (mask < (i + 1) * step)))
 		index.append(f'{round(i * step, 3)} - {round((i + 1) * step, 3)}')
 	return distribution, index
